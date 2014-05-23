@@ -24,6 +24,12 @@
  */
 #define NARGS 2
 
+/*
+ * Function signature definitions.
+ */
+void
+parse_args(int, char **, int *, int *, Item **);
+
 /**
  * Prints usage message on passing of bad cmd line args.
  */
@@ -65,10 +71,12 @@ main(int argc, char **argv) {
  * @param Item **items
  *      Pointer to array of Items.  Function will initialize needed heap memory.
  */
+void
 parse_args(int argc, char **argv,int *n, int *K, Item **items) {
 
         char buf[MAX_LINE_LENGTH];
         char *token;
+        char delimiters[] = " ";
         FILE *in;
         int line_length, lineno = 0;
 
@@ -92,7 +100,7 @@ parse_args(int argc, char **argv,int *n, int *K, Item **items) {
                          */
                         
                         /* Get n from input. */
-                        token = strtok(buf, ' ');
+                        token = strtok(buf, delimiters);
 
                         // if ((n = strtol(token, (char **) NULL, 10))    
                 
