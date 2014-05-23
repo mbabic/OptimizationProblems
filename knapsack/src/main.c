@@ -53,6 +53,8 @@ main(int argc, char **argv) {
 
 
         /* TODO: write solver output in the format expected by solver.py. */
+
+        return 0;
 }
 
 /**
