@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "item.h"
 
@@ -27,7 +29,9 @@
  */
 static void
 usage() {
-        exit(1, "Usage: ./knapsack_solver -i { path to input file }");
+        extern char * __progname;
+        fprintf(stderr, "Usage: ./%s { path to input file }\n", __progname);
+        exit(1);
 }
 
 int 
@@ -74,7 +78,8 @@ parse_args(int argc, char **argv,int *n, int *K, Item **items) {
 
         in = fopen(argv[2], "r");
         if (in == NULL) {
-                exit(1, "Input file provided could not be opened.");
+                fprintf(stderr, "Input file: %s could not be found.", argv[2]);
+                exit(1);
         }
 
         memset(buf, '\0', MAX_LINE_LENGTH);
