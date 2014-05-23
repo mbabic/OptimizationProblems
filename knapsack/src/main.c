@@ -123,7 +123,7 @@ parse_args(int argc, char **argv,int *n, int *K, Item **items) {
                         token = strtok(NULL, delimiters);
                         *K = (int) strtol(token, &err, 10);
                         
-                        if (err[0] != '\0') {
+                        if (err[0] == '\0') {
                               format_error(lineno);
                         }  
                 } else {
