@@ -40,6 +40,16 @@ usage() {
         exit(1);
 }
 
+/**
+ * Prints message informing user that data is not in expected format.
+ */
+void
+format_error(int lineno) {
+        fprintf(stderr, "Input data not in expected format on line %d\n",
+                        lineno);
+        exit(1);
+}
+
 int 
 main(int argc, char **argv) {
 
@@ -77,8 +87,8 @@ void
 parse_args(int argc, char **argv,int *n, int *K, Item **items) {
 
         char buf[MAX_LINE_LENGTH];
-        char *token;
-        char delimiters[] = " ";
+        char *token, *err;
+        char delimiters[] = " \n";
         FILE *in;
         int line_length, lineno = 0;
 
@@ -101,11 +111,23 @@ parse_args(int argc, char **argv,int *n, int *K, Item **items) {
                          * by a single space.
                          */
                         
-                        /* Get n from input. */
+                        /* Get n from input file. */
                         token = strtok(buf, delimiters);
+                        *n = (int) strtol(token, &err, 10);
 
-                        // if ((n = strtol(token, (char **) NULL, 10))    
-                
+                        if (err[0] == '\0') {
+                                format_error(lineno); 
+                        } 
+
+                        /* Get K from input file. */
+                        token = strtok(NULL, delimiters);
+                        *K = (int) strtol(token, &err, 10);
+                        
+                        if (err[0] != '\0') {
+                              format_error(lineno);
+                        }  
+                } else {
+                        
                 }
                 
                 lineno++;
