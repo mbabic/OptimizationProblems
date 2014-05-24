@@ -3,7 +3,7 @@
 
 #include "item.h"
 
-solver_knapsack_instance(int, int, Item *);
-
+void
+solve_knapsack_instance(int, int, Item *);
 
 #endif

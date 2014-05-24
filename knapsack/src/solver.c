@@ -15,8 +15,9 @@
  */
 static void
 allocation_error() {
-        extern *char __progname;
-        fprintf(stderr, "Memory allocation failed in program %s.  Exiting.\n");
+        extern char *__progname;
+        fprintf(stderr, "Memory allocation failed in program %s.  Exiting.\n",
+                __progname);
         exit(1);
 }
 
@@ -32,16 +33,17 @@ allocation_error() {
  *      knapsack. 
  *
  * @return
- *      TODO: 
+ *      TODO: void for now
  */
-int solve_knapsack_instance(int n, int K, Item *items) {
+void
+solve_knapsack_instance(int n, int K, Item *items) {
         /*
          * Will implement dynamic programming solution according to the 
          * recursive relationship:
          * A[i, w] = max(A[i-1, w], v_i + A[i=1, w-w_i])
          */
 
-        Items item;
+        Item item;
         int **A, **B, i, w; 
 
         /* 
@@ -65,7 +67,7 @@ int solve_knapsack_instance(int n, int K, Item *items) {
         }
 
 
-        for (int w = 0; w < K; w++) {
+        for (w = 0; w < K; w++) {
 
                A[0][w] = 0; 
 
@@ -76,11 +78,13 @@ int solve_knapsack_instance(int n, int K, Item *items) {
                 for (w = 0; w < K; w++) {
                         if (item.weight < w) {
                                 A[i][w] = MAX(A[i-1][w],
-                                                A[i-1, w-item.weight +
+                                                A[i-1][w-item.weight +
                                                 item.value]);
                         } else {
                                 A[i][w] = A[i-1][w];
                         }
                 }
         }
+
+        DEBUG_PRINT("Solution: %d\n", A[n][K]);
 } 

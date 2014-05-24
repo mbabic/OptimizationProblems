@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "item.h"
+#include "solver.h"
 #include "utils.h"
 
 /*
@@ -50,8 +51,7 @@ main(int argc, char **argv) {
 
         parse_args(argc, argv, &n, &K, &items);        
 
-        /* TODO: call solver. */
-
+        solve_knapsack_instance(n, K, items);
 
         /* TODO: write solver output in the format expected by solver.py. */
 

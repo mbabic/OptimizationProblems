@@ -10,8 +10,9 @@ SRC = src
 CC = gcc
 CFLAGS = -c
 
-SOURCES = $(SRC)/main.c $(SRC)/solver.c $(SRC)/solver.h $(SRC)/item.h
-OBJS = $(BIN)/main.o
+SOURCES = $(SRC)/main.c $(SRC)/solver.h $(SRC)/solver.c $(SRC)/item.h 
+SOURCES += $(SRC)/utils.h
+OBJS = $(BIN)/main.o $(BIN)/solver.o
 EXE = knapsack_solver
 
 all: CFLAGS += -O3
