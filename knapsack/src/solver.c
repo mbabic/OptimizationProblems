@@ -54,7 +54,7 @@ solve_knapsack_instance(int n, int K, Item *items) {
         if (!A) allocation_error(); 
 
         for (i = 0; i < (n + 1); i++) {
-                A[i] = malloc(K * sizeof(int));
+                A[i] = malloc((K+1) * sizeof(int));
                 if (!A[i]) allocation_error(); 
         }
 
@@ -62,24 +62,22 @@ solve_knapsack_instance(int n, int K, Item *items) {
         if (!B) allocation_error();
 
         for (i = 0; i < (n + 1); i++) {
-                B[i] = malloc(K * sizeof(int));
+                B[i] = malloc((K+1) * sizeof(int));
                 if (!B[i]) allocation_error();
         }
 
 
-        for (w = 0; w < K; w++) {
-
+        for (w = 0; w <= K; w++) {
                A[0][w] = 0; 
-
         }
 
         for (i = 1; i < (n + 1); i++) {
-                item = items[i];
-                for (w = 0; w < K; w++) {
-                        if (item.weight < w) {
+                item = items[i-1];
+                for (w = 0; w <= K; w++) {
+                        if (item.weight <= w) {
                                 A[i][w] = MAX(A[i-1][w],
-                                                A[i-1][w-item.weight +
-                                                item.value]);
+                                                A[i-1][w-item.weight] +
+                                                item.value);
                         } else {
                                 A[i][w] = A[i-1][w];
                         }
