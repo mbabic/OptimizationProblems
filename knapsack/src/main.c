@@ -175,6 +175,7 @@ parse_args(int argc, char **argv,int *n, int *K, Item **items) {
                                 format_error(lineno);
                         }
 
+                        (*items)[lineno - 1].isTaken = 0;
                         (*items)[lineno - 1].weight = weight;
                         (*items)[lineno - 1].value = value;
 
