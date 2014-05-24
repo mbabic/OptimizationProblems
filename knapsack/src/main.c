@@ -96,9 +96,10 @@ parse_args(int argc, char **argv,int *n, int *K, Item **items) {
                 usage();
         }
 
-        in = fopen(argv[2], "r");
+        in = fopen(argv[1], "r");
         if (in == NULL) {
-                fprintf(stderr, "Input file: %s could not be found.", argv[2]);
+                fprintf(stderr, "Input file: %s could not be found.\n", 
+                                argv[1]);
                 exit(1);
         }
 
