@@ -45,15 +45,16 @@ format_error(int lineno) {
 int 
 main(int argc, char **argv) {
 
-        Item *items;
+        Item *items;    /* Array of Item structs defining problem instance. */
+        char *sol;      /* Solution string returned by solver. */
         int n,          /* The number of items in the knapsack. */ 
             K;          /* The capacity of the knapsack. */
 
         parse_args(argc, argv, &n, &K, &items);        
 
-        solve_knapsack_instance(n, K, items);
+        sol = solve_knapsack_instance(n, K, items);
 
-        /* TODO: write solver output in the format expected by solver.py. */
+        printf("%s", sol);
 
         return 0;
 }

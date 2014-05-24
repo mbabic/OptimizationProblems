@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "solver.h"
 #include "utils.h"
@@ -21,6 +22,11 @@ allocation_error() {
         exit(1);
 }
 
+static void
+construct_solution(int **, int, int, Item *);
+
+static char *
+construct_solution_string(int **, int, int, Item *);
 
 /**
  * Solve instance of knapsack problem parameterized by given arguments.
@@ -35,7 +41,7 @@ allocation_error() {
  * @return
  *      TODO: void for now
  */
-void
+char *
 solve_knapsack_instance(int n, int K, Item *items) {
         /*
          * Will implement dynamic programming solution according to the 
@@ -86,7 +92,23 @@ solve_knapsack_instance(int n, int K, Item *items) {
         }
 
         /* Construct solution from value in matrix of sub-solutions. */
-        w = K;
+        construct_solution(A, n, K, items);
+
+        DEBUG_PRINT("Solution: %d\n", A[n][K]);
+
+        return construct_solution_string(A, n, K, items);
+
+} 
+
+/**
+ * For each item, set its isTaken variable based on the values in the 
+ * sub-solution matrix.  That is, after having tabulated all entries in the
+ * matrix, construct_solution uses the values to determine which items
+ * were taken and which were not. 
+ */
+static void
+construct_solution(int **A, int n, int K, Item *items) {
+        int w = K, i;
         for (i = n; i > 0; i--) {
                 
                 if (A[i][w] == A[i-1][w-items[i-1].weight] + items[i-1].value) {
@@ -97,6 +119,45 @@ solve_knapsack_instance(int n, int K, Item *items) {
                 DEBUG_PRINT("Solution: item %d isTaken = %d\n",
                                 i-1, items[i-1].isTaken);
         } 
+}
 
-        DEBUG_PRINT("Solution: %d\n", A[n][K]);
-} 
+static char *
+construct_solution_string(int **A, int n, int K, Item *items) {
+
+        char *sol, *is_taken_str;
+        int len, i;
+        
+        /* Calculate space required to create string. */
+        /* 
+         * For first line, need (MAX LENGTH IN DIGITS OF INTEGER) + 
+         * 4 bytes (3 whitespace bytes, 1 byte for optimality boolean)
+         */
+        len = 9 + 4;
+
+        /* 
+         * For second line, need 2*n bytes (1 byte for each boolean indicating
+         * whether the i_th item was taken, n bytes for whitepsace.
+         */
+        len += 2*n; 
+
+        sol = malloc((len + 1) * sizeof(char));
+        if (!sol) allocation_error();
+        
+        is_taken_str = malloc((2*n + 1) * sizeof(char));
+        if (!is_taken_str) allocation_error();
+
+        sprintf(sol, "%d %d\n", A[n][K], 1);
+
+        for (i = 0; i < 2*n; i += 2) {
+                is_taken_str[i] = items[i].isTaken ? '1' : '0';
+                is_taken_str[i+1] = ' ';
+        }
+        is_taken_str[2*n] = '\n';
+        is_taken_str[(2*n) + 1] = '\0';
+
+        strcat(sol, is_taken_str);
+        
+        DEBUG_PRINT("Solution string: %s\n", sol);
+       
+        return sol; 
+}
