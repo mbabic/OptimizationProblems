@@ -8,10 +8,10 @@
  * Define debug printing macro.
  */
 #ifdef DEBUG
-#define DEBUG_PRINT(s, ...) do {fprintf(stderr, "DEBUG %s:%d: \n" s "\n", \
-				__FILE__, __LINE__, ##__VA_ARGS__);} while (0)
+#define DEBUG_PRINT(s, ...) do {fprintf(stderr, "DEBUG %s:%d: " s "\n", \
+				__FILE__, __LINE__, ##__VA_ARGS__)} while (0)
 #else
-#define DEBUG_PRINT(s, ...) do {} while (0)
+#define DEBUG_PRINT(s) do {} while (0)
 #endif
 
 
@@ -151,7 +151,7 @@ parse_args(int argc, char **argv,int *n, int *K, Item **items) {
                                         "array.");
                         }
 
-                        DEBUG_PRINT("n = %d\n K = %d\n", *n, *K);
+                        DEBUG_PRINT("n = %d\n K = %d\n", n, K);
 
                 } else {
                         /* Instantiate no more than n items. */
@@ -168,7 +168,7 @@ parse_args(int argc, char **argv,int *n, int *K, Item **items) {
         
                         /* Get item value from input file. */
                         /* TODO: determine if value is allowed to be < 0. */
-                        token = strtok(NULL, delimiters);
+                        token = strtok(buf, delimiters);
                         value = (int) strtol(token, &err, 10);
                         
                         if (err[0] != '\0') {
