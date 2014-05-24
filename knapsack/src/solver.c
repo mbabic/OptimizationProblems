@@ -10,11 +10,6 @@
 #include "solver.h"
 #include "utils.h"
 
-/*
- * Define MACRO for taking max of two integers.
- */
-#define MAX(a, b) do { a <= b ? a : b;} while(0)
-
 /**
  * Prints message indicating memory allocation failure and exits program.
  */

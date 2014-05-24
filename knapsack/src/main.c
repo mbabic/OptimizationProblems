@@ -3,18 +3,7 @@
 #include <string.h>
 
 #include "item.h"
-
-/*
- * Define debug printing macro.
- */
-#ifdef DEBUG
-#define DEBUG_PRINT(s, ...) do {fprintf(stderr, "DEBUG %s:%d: \n" s "\n", \
-				__FILE__, __LINE__, ##__VA_ARGS__);} while (0)
-#else
-#define DEBUG_PRINT(s, ...) do {} while (0)
-#endif
-
-
+#include "utils.h"
 
 /*
  * Define max length of line we will read from input file.
