@@ -66,11 +66,12 @@ solve_knapsack_instance(int n, int K, Item *items) {
                 if (!B[i]) allocation_error();
         }
 
-
+        /* Set initial values. */
         for (w = 0; w <= K; w++) {
                A[0][w] = 0; 
         }
 
+        /* Populate matrix of sub-solutions. */
         for (i = 1; i < (n + 1); i++) {
                 item = items[i-1];
                 for (w = 0; w <= K; w++) {
@@ -83,6 +84,19 @@ solve_knapsack_instance(int n, int K, Item *items) {
                         }
                 }
         }
+
+        /* Construct solution from value in matrix of sub-solutions. */
+        w = K;
+        for (i = n; i > 0; i--) {
+                
+                if (A[i][w] == A[i-1][w-items[i-1].weight] + items[i-1].value) {
+                        // Item i appeared in the solution.  Set its isTaken
+                        // attribute to be true.
+                        items[i-1].isTaken = 1;
+                } 
+                DEBUG_PRINT("Solution: item %d isTaken = %d\n",
+                                i-1, items[i-1].isTaken);
+        } 
 
         DEBUG_PRINT("Solution: %d\n", A[n][K]);
 } 
