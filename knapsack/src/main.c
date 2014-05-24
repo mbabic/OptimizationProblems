@@ -90,7 +90,7 @@ parse_args(int argc, char **argv,int *n, int *K, Item **items) {
         char *token, *err;
         char delimiters[] = " \n";
         FILE *in;
-        int line_length, lineno = 0;
+        int lineno = 0, weight, value;
 
         if (argc < NARGS) {
                 usage();
@@ -115,21 +115,71 @@ parse_args(int argc, char **argv,int *n, int *K, Item **items) {
                         token = strtok(buf, delimiters);
                         *n = (int) strtol(token, &err, 10);
 
-                        if (err[0] == '\0') {
+                        if (err[0] != '\0') {
                                 format_error(lineno); 
                         } 
+
+                        if (*n < 0) {
+                                fprintf(stderr,
+                                        "Number of items in knapsack cannot "
+                                        "be < 0.\n");
+                                exit(1);
+                        }
 
                         /* Get K from input file. */
                         token = strtok(NULL, delimiters);
                         *K = (int) strtol(token, &err, 10);
                         
-                        if (err[0] == '\0') {
+                        if (err[0] != '\0') {
                               format_error(lineno);
                         }  
+
+                        if (*K < 0) {
+                                fprintf(stderr,
+                                        "Knapsack capacity cannot be < 0.\n");
+                                exit(1);
+                        }
+
+                        /* Allocate memory for array of items. */
+                        *items = malloc(sizeof(Item) * (*n));
+                        if (*items == NULL) {
+                                fprintf(stderr, 
+                                        "Failed to allocate memory for items "
+                                        "array.");
+                        }
+
                 } else {
+                        /* Instantiate no more than n items. */
+                        if (lineno > *n) break;
+
+                        /* Get item weight from input file. */
+                        /* TODO: determine if weight is allowed to be < 0. */
+                        token = strtok(buf, delimiters);
+                        weight = (int) strtol(token, &err, 10);
+
+                        if (err[0] != '\0') {
+                                format_error(lineno);
+                        } 
+        
+                        /* Get item value from input file. */
+                        /* TODO: determine if value is allowed to be < 0. */
+                        token = strtok(buf, delimiters);
+                        value = (int) strtol(token, &err, 10);
                         
+                        if (err[0] != '\0') {
+                                format_error(lineno);
+                        }
+
+                        (*items)[lineno - 1].weight = weight;
+                        (*items)[lineno - 1].value = value;
                 }
                 
                 lineno++;
+        }
+
+        if (lineno < (*n) + 1) {
+                fprintf(stderr, "Less items were given than was specified "
+                                "on first line of input.\n");
+                exit(1);
         }
 }
