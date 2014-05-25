@@ -15,5 +15,5 @@
 /*
  * MACRO which returns the maximum of two integers. 
  */
-#define MAX(a, b) a >= b ? a : b
+#define MAX(a, b) a > b ? a : b
 

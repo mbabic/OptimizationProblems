@@ -117,20 +117,17 @@ solve_knapsack_instance(int n, int K, Item *items) {
  */
 static void
 construct_solution(int **A, int n, int K, Item *items) {
-        int w = K, i;
-        for (i = n; i > 0; i--) {
-               
-                if (items[i-1].weight > w) continue;
-
-                if (A[i][w] == A[i][w-items[i-1].weight] + items[i-1].value) {
+        int w = K, i = n;
+        while (i > 0 && w > 0) {
+                if (A[i][w] != A[i-1][w]) {
                         // Item i appeared in the solution.  Set its isTaken
                         // attribute to be true.
                         items[i-1].isTaken = 1;
                         w -= items[i-1].weight;
-        
                         DEBUG_PRINT("Solution: item %d isTaken = %d\n",
                                 i-1, items[i-1].isTaken);
                 } 
+                i--;
         } 
 }
 
