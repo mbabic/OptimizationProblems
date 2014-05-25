@@ -4,7 +4,6 @@
  * Marko Tomislav Babic - mbabic@ualberta.ca
  */
 
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,10 +23,10 @@ allocation_error() {
 }
 
 static void
-construct_solution(int **, int, int, Item *);
+construct_solution(int *, int, int, Item *);
 
 static char *
-construct_solution_string(int **, int, int, Item *);
+construct_solution_string(int *, int, int, Item *);
 
 /**
  * Solve instance of knapsack problem parameterized by given arguments.
@@ -50,60 +49,41 @@ solve_knapsack_instance(int n, int K, Item *items) {
          * A[i, w] = max(A[i-1, w], v_i + A[i=1, w-w_i])
          */
         Item item;
-        int **A, i, w; 
+        int *A, *ACpy, i, w; 
 
         /* 
          * Init solution matrix and auxilliary boolean matrix used in 
          * solution reconstruction. 
          */
-        A = malloc((n + 1) * sizeof(int *));
+        A = malloc((K + 1) * sizeof(int));
         if (!A) allocation_error(); 
 
-        for (i = 0; i < (n + 1); i++) {
-                A[i] = malloc((K+1) * sizeof(int));
-                if (!A[i]) allocation_error(); 
-        }
+        ACpy = malloc((K + 1) * sizeof(int));
+        if (!ACpy) allocation_error();
 
         /* Set initial values. */
         for (w = 0; w <= K; w++) {
-               A[0][w] = 0; 
+               A[w] = 0; 
         }
 
         /* Populate matrix of sub-solutions. */
-        for (i = 1; i < (n + 1); i++) {
-                item = items[i-1];
+        for (i = 0; i < n; i++) {
+
+                for (w = 0; w <= K; w++) ACpy[w] = A[w];
+
+                item = items[i];
                 for (w = 0; w <= K; w++) {
-                        if (item.weight <= w) {
-                                A[i][w] = MAX(A[i-1][w],
-                                                A[i-1][w-item.weight] +
-                                                item.value);
-                        } else {
-                                A[i][w] = A[i-1][w];
-                        }
+                        if (item.weight <= w && 
+                            A[w] < ACpy[w-item.weight] + item.value) {
+                                A[w] = ACpy[w-item.weight] + item.value;
+                        } 
                 }
         }
-
+        
         /* Construct solution from values in matrix of sub-solutions. */
         construct_solution(A, n, K, items);
 
-        DEBUG_PRINT("Solution: %d\n", A[n][K]);
-
-
-#ifdef DEBUG
-        // Run validation test if is debug build.
-        int value_sum = 0, weight_sum = 0;
-        for (i = 0; i < n; i++) {
-                if (items[i].isTaken) {
-                        value_sum += items[i].value;
-                        weight_sum += items[i].weight;
-                }
-        }
-
-        assert(value_sum == A[n][K] && "Sum of values of items in knapsack"
-                                       "should match value of final solution.");
-        assert(weight_sum <= K && "Sum of weights of items in knapsack should"
-                                  "be less than capacity of knapsack.");
-#endif
+        DEBUG_PRINT("Solution: %d\n", A[K]);
 
         return construct_solution_string(A, n, K, items);
 
@@ -116,15 +96,17 @@ solve_knapsack_instance(int n, int K, Item *items) {
  * were taken and which were not. 
  */
 static void
-construct_solution(int **A, int n, int K, Item *items) {
+construct_solution(int *A, int n, int K, Item *items) {
         int w = K, i;
         for (i = n; i > 0; i--) {
                 
-                if (A[i][w] == A[i][w-items[i-1].weight] + items[i-1].value) {
+                if (w < items[i-1].weight) continue;
+
+                if (A[w] == A[w-items[i-1].weight] + items[i-1].value) {
                         // Item i appeared in the solution.  Set its isTaken
                         // attribute to be true.
                         items[i-1].isTaken = 1;
-                        w -= items[i-1].weight;
+                        w = w - items[i-1].weight;
                 } 
                 DEBUG_PRINT("Solution: item %d isTaken = %d\n",
                                 i-1, items[i-1].isTaken);
@@ -132,7 +114,7 @@ construct_solution(int **A, int n, int K, Item *items) {
 }
 
 static char *
-construct_solution_string(int **A, int n, int K, Item *items) {
+construct_solution_string(int *A, int n, int K, Item *items) {
 
         char *sol, *is_taken_str;
         int len, i;
@@ -156,7 +138,7 @@ construct_solution_string(int **A, int n, int K, Item *items) {
         is_taken_str = malloc((2*n + 1) * sizeof(char));
         if (!is_taken_str) allocation_error();
 
-        sprintf(sol, "%d %d\n", A[n][K], 1);
+        sprintf(sol, "%d %d\n", A[K], 1);
 
         for (i = 0; i < 2*n; i += 2) {
                 is_taken_str[i] = items[i / 2].isTaken ? '1' : '0';

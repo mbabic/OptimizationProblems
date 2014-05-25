@@ -97,13 +97,11 @@ parse_args(int argc, char **argv,int *n, int *K, Item **items) {
 
         memset(buf, '\0', MAX_LINE_LENGTH);
         while (fgets(buf, MAX_LINE_LENGTH, in) != NULL) {
-
                 if (lineno == 0) {
                         /*
                          * We expect first line to contain n and K separated
                          * by a single space.
                          */
-                        
                         /* Get n from input file. */
                         token = strtok(buf, delimiters);
                         *n = (int) strtol(token, &err, 10);
@@ -172,9 +170,7 @@ parse_args(int argc, char **argv,int *n, int *K, Item **items) {
                         DEBUG_PRINT("items[%d].weight = %d\n items[%d].value "
                                         "= %d\n", lineno - 1, weight, 
                                         lineno - 1, value);
-
                 }
-                
                 lineno++;
         }
 
