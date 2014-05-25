@@ -148,7 +148,7 @@ parse_args(int argc, char **argv,int *n, int *K, Item **items) {
                         /* Get item weight from input file. */
                         /* TODO: determine if weight is allowed to be < 0. */
                         token = strtok(buf, delimiters);
-                        weight = (int) strtol(token, &err, 10);
+                        value = (int) strtol(token, &err, 10);
 
                         if (err[0] != '\0') {
                                 format_error(lineno);
@@ -157,7 +157,7 @@ parse_args(int argc, char **argv,int *n, int *K, Item **items) {
                         /* Get item value from input file. */
                         /* TODO: determine if value is allowed to be < 0. */
                         token = strtok(NULL, delimiters);
-                        value = (int) strtol(token, &err, 10);
+                        weight = (int) strtol(token, &err, 10);
                         
                         if (err[0] != '\0') {
                                 format_error(lineno);
