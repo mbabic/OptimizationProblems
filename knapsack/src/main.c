@@ -54,6 +54,8 @@ main(int argc, char **argv) {
 
         sol = solve_knapsack_instance(n, K, items);
 
+        free(items);
+
         printf("%s", sol);
 
         return 0;

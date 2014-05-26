@@ -128,6 +128,12 @@ solve_knapsack_instance_dp(int n, int K, Item *items) {
                                   "be less than capacity of knapsack.");
 #endif
 
+        /* Free allocated memory. */
+        for (i = 0; i < (n+1); i++) {
+                free(A[i]);
+        }
+        free(A);
+
         return construct_solution_string(A, n, K, items);
 
 } 
@@ -275,6 +281,8 @@ solve_knapsack_instance_bb(int n, int K, Item *items) {
 
                 }
         }
+
+        pqueue_free(pq);
 
         sprintf(sol, "%d\n", maxvalue);
         return sol;

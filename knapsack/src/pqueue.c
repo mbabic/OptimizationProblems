@@ -115,4 +115,10 @@ pqueue_dequeue(PQueue *pq, void **data, double *priority) {
         }
         pq->elements[k] = pq->elements[pq->nElements];
 }
- 
+
+
+void
+pqueue_free(PQueue *pq) {
+        if (!pq) return;
+        if (pq->elements) free(pq->elements);
+}

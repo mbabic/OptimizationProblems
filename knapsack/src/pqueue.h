@@ -50,4 +50,6 @@ PQueue *pqueue_init(int, double (*calculate_priority)(void *));
 void pqueue_enqueue(PQueue *, void *);
 
 void pqueue_dequeue(PQueue *, void **, double *);
+
+void pqueue_free(PQueue *);
 #endif
