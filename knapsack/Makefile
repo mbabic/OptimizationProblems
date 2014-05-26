@@ -10,9 +10,9 @@ SRC = src
 CC = gcc
 CFLAGS = -c
 
-SOURCES = $(SRC)/main.c $(SRC)/solver.h $(SRC)/solver.c $(SRC)/item.h 
-SOURCES += $(SRC)/utils.h $(SRC)/pqueue.c $(SRC)/pqueue.h
-OBJS = $(BIN)/main.o $(BIN)/solver.o $(BIN)/pqueue.o
+SOURCES = $(SRC)/main.c $(SRC)/solver.h $(SRC)/solver.c $(SRC)/item.c 
+SOURCES += $(SRC)/item.h $(SRC)/utils.h $(SRC)/pqueue.c $(SRC)/pqueue.h
+OBJS = $(BIN)/main.o $(BIN)/solver.o $(BIN)/pqueue.o $(BIN)/item.o
 EXE = knapsack_solver
 
 all: CFLAGS += -O3
@@ -30,4 +30,9 @@ $(EXE): $(OBJS)
 
 $(OBJS): $(SOURCES)
 	$(CC) $(CFLAGS) $(subst bin,src,$(subst .o,.c,$@)) -o $@
+
+test: $(SOURCES) test.c
+	gcc -g -c src/pqueue.c -o pqueue.o
+	gcc -g -c test.c -o test.o
+	gcc test.o pqueue.o -o test
 
