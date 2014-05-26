@@ -49,5 +49,5 @@ PQueue *pqueue_init(int, void *);
 
 void pqueue_enqueue(PQueue *, int *);
 
-void pqueue_dequeue(PQueue *);
+void pqueue_dequeue(PQueue *, void **, int *);
 #endif
