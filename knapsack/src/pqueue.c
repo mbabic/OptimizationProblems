@@ -1,6 +1,7 @@
 /*
  * Module implementing a priority queue in the C programming language.
  * Marko Tomislav Babic - mbabic
+ * Some details cribbed from rosettacode.rog/wiki/Priority_queue
  */
 
 #include <assert.h>
@@ -38,7 +39,7 @@ pqueue_grow(PQueue *pq) {
 }
 
 PQueue *
-pqueue_init(int sz, void *calculate_priority) {
+pqueue_init(int sz, double (*calculate_priority)(void *)) {
 
         PQueue *pq;
 
@@ -59,36 +60,35 @@ pqueue_init(int sz, void *calculate_priority) {
 
 
 void
-pqueue_enqueue(PQueue *pq, int *pqueue_elem_data) {
+pqueue_enqueue(PQueue *pq, void *pqueue_elem_data) {
 
-        int k, level, element_priority;
+        double element_priority;
+        int k, level;
 
         assert(pq->nElements <= pq->sz);
 
         if (pq->nElements == pq->sz) pqueue_grow(pq);
 
-        k = pq->sz;
-        pq->sz++; 
+        k = pq->nElements++;
                
         element_priority = pq->calculate_priority(pqueue_elem_data);
 
-        /* Bubble new element up the heap until */
-        while (1) {
-                level = k / 2;
-                if (element_priority < pq->elements[k].priority && level > 0) { 
-                        pq->elements[k] = pq->elements[level];
-                        k = level;
-                } else {
-                        break;
-                }
-        }
+        printf("%f\n", element_priority);
 
+        /* Bubble new element up the heap into correct position. */
+        while ((level =  k / 2) && 
+                        (element_priority < pq->elements[level].priority)) {
+                
+                pq->elements[k].data = pq->elements[level].data;
+                pq->elements[k].priority = pq->elements[level].priority;
+                k = level;
+        }
         pq->elements[k].data = pqueue_elem_data;
         pq->elements[k].priority = element_priority;
 }
 
 void 
-pqueue_dequeue(PQueue *pq, void **data, int *priority) {
+pqueue_dequeue(PQueue *pq, void **data, double *priority) {
 
         int k, level;
         /* If queue is empty, return null pointer. */

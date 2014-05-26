@@ -16,7 +16,7 @@ typedef struct {
         void *data;  
 
         /** The priority of the element. */   
-        int priority;
+        double priority;
 } PQueueElement;
 
 
@@ -29,7 +29,7 @@ typedef struct {
          * elements in the queue.  The defined function must return an
          * integer and take as parameter a single void pointer.
          */
-        int (*calculate_priority)(void *);
+        double (*calculate_priority)(void *);
         
         /** 
          * The max number of elements that can be stored in queue (will
@@ -45,9 +45,9 @@ typedef struct {
 
 
 
-PQueue *pqueue_init(int, void *);
+PQueue *pqueue_init(int, double (*calculate_priority)(void *));
 
-void pqueue_enqueue(PQueue *, int *);
+void pqueue_enqueue(PQueue *, void *);
 
-void pqueue_dequeue(PQueue *, void **, int *);
+void pqueue_dequeue(PQueue *, void **, double *);
 #endif
