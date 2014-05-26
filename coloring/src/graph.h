@@ -12,6 +12,12 @@ typedef struct {
          */
         int id;
 
+        /**
+         * The degree over the node (i.e., the number of nodes in the graph
+         * with which it shares and edge.
+         */
+        int degree;
+
         /** The color given to the node. */
         int color;       
 } Node;

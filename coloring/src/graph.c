@@ -53,18 +53,54 @@ graph_init(int nNodes) {
 void
 graph_add_edge(Graph *g, int u, int v) {
 
+        int i, id, nMatches;
+
         assert(g != NULL);
         assert(u< g->n && v < g->n);
 
         g->adj[u][v] = 1;
+
+        for (i = 0; i < g->n; i++) {
+
+                id = g->nodes[i].id;
+
+                if (id == u) {
+                        g->nodes[i].degree++;
+                        nMatches++;
+                }
+                if (id == v) {
+                        g->nodes[i].degree++;
+                        nMatches++;
+                }
+
+                if (nMatches == 2) break;
+        }
 }
 
 void
 graph_remove_edge(Graph *g, int u, int v) {
 
+        int i, id, nMatches;
+
         assert(g != NULL);
         assert(u < g->n && v < g->n);
 
         g->adj[u][v] = 0;
+
+        for (i = 0; i < g->n; i++) {
+
+                id = g->nodes[i].id;
+
+                if (id == u) {
+                        g->nodes[i].degree++;
+                        nMatches++;
+                }
+                if (id == v) {
+                        g->nodes[i].degree++;
+                        nMatches++;
+                }
+
+                if (nMatches == 2) break;
+        }
 }
 
