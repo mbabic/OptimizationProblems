@@ -92,23 +92,27 @@ pqueue_dequeue(PQueue *pq, void **data, double *priority) {
 
         int k, level;
         /* If queue is empty, return null pointer. */
-        if (pq->nElements <= 1) return;
+        if (pq->nElements <= 1 && data) *data = NULL;
+        else if (pq->nElements <= 1) return;
 
         if (data) *data = pq->elements[1].data; 
         if (priority) *priority = pq->elements[1].priority;
 
         /* Re-order queue. */
+        pq->nElements--;
         k = 1;
-        while (1) {
-                level = k * 2; 
-                if (level + 1 < pq->nElements && 
-                    pq->elements[level+1].priority < 
-                        pq->elements[level].priority) level ++;
+        while ((level = k * 2) < pq->nElements) {
+                if (level+1 < pq->nElements &&
+                    (pq->elements[level].priority > 
+                     pq->elements[level+1].priority)) 
+                        level++;
 
-                if (pq->elements[pq->nElements].priority <= 
+                if (pq->elements[pq->nElements].priority <=
                     pq->elements[level].priority) break;
 
-                pq->elements[k] = pq->elements[level];
+                pq->elements[k].data = pq->elements[level].data;
+                pq->elements[k].priority = pq->elements[level].priority;
+
                 k = level;
         }
         pq->elements[k] = pq->elements[pq->nElements];
