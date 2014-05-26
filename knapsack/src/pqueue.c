@@ -1,5 +1,5 @@
 /*
- * Module implementing a priority queue in the C programming language.
+ * Module implementing a max priority queue in the C programming language.
  * Marko Tomislav Babic - mbabic
  * Some details cribbed from rosettacode.rog/wiki/Priority_queue
  */
@@ -77,7 +77,7 @@ pqueue_enqueue(PQueue *pq, void *pqueue_elem_data) {
 
         /* Bubble new element up the heap into correct position. */
         while ((level =  k / 2) && 
-                        (element_priority < pq->elements[level].priority)) {
+                        (element_priority > pq->elements[level].priority)) {
                 
                 pq->elements[k].data = pq->elements[level].data;
                 pq->elements[k].priority = pq->elements[level].priority;
@@ -103,11 +103,11 @@ pqueue_dequeue(PQueue *pq, void **data, double *priority) {
         k = 1;
         while ((level = k * 2) < pq->nElements) {
                 if (level+1 < pq->nElements &&
-                    (pq->elements[level].priority > 
+                    (pq->elements[level].priority < 
                      pq->elements[level+1].priority)) 
                         level++;
 
-                if (pq->elements[pq->nElements].priority <=
+                if (pq->elements[pq->nElements].priority >=
                     pq->elements[level].priority) break;
 
                 pq->elements[k].data = pq->elements[level].data;
