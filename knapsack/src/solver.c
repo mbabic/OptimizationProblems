@@ -9,8 +9,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "pqueue.h"
+#include "node.h"
 #include "item.h"
+#include "pqueue.h"
 #include "solver.h"
 #include "utils.h"
 
@@ -26,7 +27,7 @@ allocation_error() {
 }
 
 static double
-bound(int, int, Item *, Item *);
+bound(int, int, Item *, Node *);
 
 static void
 construct_solution(int **, int, int, Item *);
@@ -197,22 +198,30 @@ construct_solution_string(int **A, int n, int K, Item *items) {
 /**
  * Solve given instance of the knapsack problem using a branch and bound
  * approach.
+ * TODO: the solution presented below represents a "rough" attempt and is not
+ * in anyway optimized.
+ * TODO: solution in terms of which items are picked along the optimal path
+ * could easily be recovered by associating with each node a bitvector 
+ * encoding the decision made along the tree in order to arrive at that
+ * particular node (e.g., for the node encoding that we did not take
+ * the first item, but took the second and third items, the node's bit vector
+ * would be equal to 011) 
  */
 static char *
 solve_knapsack_instance_bb(int n, int K, Item *items) {
 
         PQueue *pq;
-        Item *u, *v, tmp;
-        double u_bound, v_bound;
+        Node *u, *v; 
+        Item tmp;
         int maxvalue;
         char *sol = malloc(128 * sizeof(char));
         
-        pq = pqueue_init(n, calculate_item_priority);
+        pq = pqueue_init(n, node_get_bound);
 
         v = malloc(sizeof(Item));
         if (!v) allocation_error();
 
-        v->id = -1;
+        v->level = -1;
         v->value = 0;
         v->weight = 0;
 
@@ -223,41 +232,42 @@ solve_knapsack_instance_bb(int n, int K, Item *items) {
 
                 pqueue_dequeue(pq, (void **) &v, NULL);
 
-                v_bound = bound(n, K, items, v);
+                v->bound = bound(n, K, items, v);
 
-                if (v_bound > maxvalue) {
+                DEBUG_PRINT("maxvalue: %d\t v->bound: %f", maxvalue, v->bound);
+
+                if (v->bound > maxvalue) {
 
                         /* Set u to be child that includes next item. */
-                        /* Better solution, preallocate and dynamically grow
+                        /* Better solution: preallocate and dynamically grow
                          * array of Items to be used as nodes in search tree */
-                        u = malloc(sizeof(Item));
+                        u = malloc(sizeof(Node));
                         if (!u) allocation_error();
 
-                        tmp = items[v->id + 1];
-                        u->weight = v->weight + tmp.weight;
-                        u->value = v->value + tmp.value;
-                        u->id = v->id + 1;
+                        u->level = v->level + 1;
+                        u->weight = v->weight + items[u->level].weight;
+                        u->value = v->value + items[u->level].value;
 
-                        if (u->value <= K && u->value > maxvalue) 
+                        if (u->weight <= K && u->value > maxvalue) 
                                 maxvalue = u->value;
 
-                        u_bound = bound(n, K, items, u);
+                        u->bound = bound(n, K, items, u);
 
-                        if (u_bound > maxvalue)
+                        if (u->bound > maxvalue)
                                 pqueue_enqueue(pq, (void *) u);
                         else free(u);
 
                         /* Set u to be child that does not include next item */
-                        u = malloc(sizeof(Item));
+                        u = malloc(sizeof(Node));
                         if (!u) allocation_error();
 
+                        u->level = v->level + 1;
                         u->weight = v->weight;
                         u->value = v->value;
-                        u->id = v->id + 1;
 
-                        u_bound = bound(n, K, items, u);
+                        u->bound = bound(n, K, items, u);
 
-                        if (u_bound > maxvalue)
+                        if (u->bound > maxvalue)
                                 pqueue_enqueue(pq, (void *) u);
                         else free(u);
 
@@ -277,18 +287,18 @@ solve_knapsack_instance_bb(int n, int K, Item *items) {
  * taken.
  */
 static double
-bound(int n, int K, Item *items, Item *x) {
+bound(int n, int K, Item *items, Node *x) {
 
         double ret;
         int j, total_weight;
 
         /* If weight of item exceeds capacity of knapsack, it cannot be 
          * part of any feasible solution as so its value is 0. */ 
-        if (x->weight >= K) return 0;
+        if (x->weight > K) return 0;
 
 
         ret = x->value;
-        j = x->id + 1;
+        j = x->level + 1;
         total_weight = x->weight;
 
         while (j < n && (total_weight + items[j].value) <= K) {
@@ -299,7 +309,9 @@ bound(int n, int K, Item *items, Item *x) {
 
         /* Grab faction of jth item to fill rest of knapsack. */
         if (j < n) 
-                ret += (K - total_weight) * calculate_item_priority((void *) x);
+                ret += (K - total_weight) * 
+                        ( (double)items[j].value / 
+                          (double)items[j].weight);
         
         return ret;
 }

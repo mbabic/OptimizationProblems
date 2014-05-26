@@ -73,8 +73,6 @@ pqueue_enqueue(PQueue *pq, void *pqueue_elem_data) {
                
         element_priority = pq->calculate_priority(pqueue_elem_data);
 
-        printf("%f\n", element_priority);
-
         /* Bubble new element up the heap into correct position. */
         while ((level =  k / 2) && 
                         (element_priority > pq->elements[level].priority)) {
