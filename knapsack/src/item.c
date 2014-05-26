@@ -2,6 +2,7 @@
  * Module defining functionality and attributes related to an in item
  * in the knapsack.
  */
+#include <assert.h>
 #include <stdlib.h>
 
 #include "item.h"
@@ -12,12 +13,13 @@
  */
 double 
 calculate_item_priority(void *x) {
-        /* Assuming item has weight > 0, as else solution to knapsack problem
-         * is trivially equal to +inf. */
         Item *item = (Item *) x;
 
         assert(item != NULL);
-        assert(item->weight > 0);
 
-        return double( ((double) item->value) / ((double) item->weight) );
+        if (item->weight == 0) return 0;
+
+        return (double) ( ((double) item->value) / ((double) item->weight) );
 }
+
+

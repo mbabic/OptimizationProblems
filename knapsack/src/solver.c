@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "pqueue.h"
+#include "item.h"
 #include "solver.h"
 #include "utils.h"
 
@@ -23,11 +25,22 @@ allocation_error() {
         exit(1);
 }
 
+static double
+bound(int, int, Item *, Item *);
+
 static void
 construct_solution(int **, int, int, Item *);
 
 static char *
 construct_solution_string(int **, int, int, Item *);
+
+static char *
+solve_knapsack_instance_bb(int, int, Item *);
+
+static char *
+solve_knapsack_instance_dp(int, int, Item *);
+
+
 
 /**
  * Solve instance of knapsack problem parameterized by given arguments.
@@ -40,10 +53,19 @@ construct_solution_string(int **, int, int, Item *);
  *      knapsack. 
  *
  * @return
- *      TODO: void for now
+ *      String encoding solution.
  */
 char *
 solve_knapsack_instance(int n, int K, Item *items) {
+        return solve_knapsack_instance_bb(n, K, items);
+}
+
+/**
+ * Solve given instance of knapsack problem using a dynamic programming
+ * approach
+ */
+char *
+solve_knapsack_instance_dp(int n, int K, Item *items) {
         /*
          * Will implement dynamic programming solution according to the 
          * recursive relationship:
@@ -170,5 +192,115 @@ construct_solution_string(int **A, int n, int K, Item *items) {
         DEBUG_PRINT("Solution string: %s\n", sol);
        
         return sol; 
+}
+
+/**
+ * Solve given instance of the knapsack problem using a branch and bound
+ * approach.
+ */
+static char *
+solve_knapsack_instance_bb(int n, int K, Item *items) {
+
+        PQueue *pq;
+        Item *u, *v, tmp;
+        double u_bound, v_bound;
+        int maxvalue;
+        char *sol = malloc(128 * sizeof(char));
+        
+        pq = pqueue_init(n, calculate_item_priority);
+
+        v = malloc(sizeof(Item));
+        if (!v) allocation_error();
+
+        v->id = -1;
+        v->value = 0;
+        v->weight = 0;
+
+        pqueue_enqueue(pq, (void *) v); 
+
+        /* While priority queue is not empty ... */
+        while (pq->nElements > 1) {
+
+                pqueue_dequeue(pq, (void **) &v, NULL);
+
+                v_bound = bound(n, K, items, v);
+
+                if (v_bound > maxvalue) {
+
+                        /* Set u to be child that includes next item. */
+                        /* Better solution, preallocate and dynamically grow
+                         * array of Items to be used as nodes in search tree */
+                        u = malloc(sizeof(Item));
+                        if (!u) allocation_error();
+
+                        tmp = items[v->id + 1];
+                        u->weight = v->weight + tmp.weight;
+                        u->value = v->value + tmp.value;
+                        u->id = v->id + 1;
+
+                        if (u->value <= K && u->value > maxvalue) 
+                                maxvalue = u->value;
+
+                        u_bound = bound(n, K, items, u);
+
+                        if (u_bound > maxvalue)
+                                pqueue_enqueue(pq, (void *) u);
+                        else free(u);
+
+                        /* Set u to be child that does not include next item */
+                        u = malloc(sizeof(Item));
+                        if (!u) allocation_error();
+
+                        u->weight = v->weight;
+                        u->value = v->value;
+                        u->id = v->id + 1;
+
+                        u_bound = bound(n, K, items, u);
+
+                        if (u_bound > maxvalue)
+                                pqueue_enqueue(pq, (void *) u);
+                        else free(u);
+
+                        free(v);
+
+                }
+        }
+
+        sprintf(sol, "%d\n", maxvalue);
+        return sol;
+}
+
+/**
+ * Produces relaxated optimistic estimate for value of tree below the
+ * given Item.
+ * Constraints are relaxed by assuming fractional parts of items can be
+ * taken.
+ */
+static double
+bound(int n, int K, Item *items, Item *x) {
+
+        double ret;
+        int j, total_weight;
+
+        /* If weight of item exceeds capacity of knapsack, it cannot be 
+         * part of any feasible solution as so its value is 0. */ 
+        if (x->weight >= K) return 0;
+
+
+        ret = x->value;
+        j = x->id + 1;
+        total_weight = x->weight;
+
+        while (j < n && (total_weight + items[j].value) <= K) {
+                total_weight += items[j].weight;
+                ret += items[j].value;
+                j++;
+        }
+
+        /* Grab faction of jth item to fill rest of knapsack. */
+        if (j < n) 
+                ret += (K - total_weight) * calculate_item_priority((void *) x);
+        
+        return ret;
 }
 
