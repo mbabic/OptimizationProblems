@@ -3,6 +3,10 @@
  * Marko Tomislav Babic - mbabic
  */
 
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "pqueue.h"
 
 /**
@@ -23,7 +27,7 @@ pqueue_allocation_error() {
 static void
 pqueue_grow(PQueue *pq) {
 
-        PQueue *tmp;
+        PQueueElement *tmp;
         pq->sz *= 2;
 
         tmp = realloc(pq->elements, pq->sz * sizeof(PQueueElement));
@@ -54,9 +58,31 @@ pqueue_init(int sz, void *calculate_priority) {
 }
 
 
-PQueue *
-pqueue_enqueue(Pqueue *pq, void *pqueue_elem_data) {
+void
+pqueue_enqueue(PQueue *pq, int *pqueue_elem_data) {
 
-        PQueueElement *elem;
+        int k, level, element_priority;
 
+        assert(pq->nElements <= pq->sz);
+
+        if (pq->nElements == pq->sz) pqueue_grow(pq);
+
+        k = pq->sz;
+        pq->sz++; 
+               
+        element_priority = pq->calculate_priority(pqueue_elem_data);
+
+        /* Bubble new element up the heap until */
+        while (1) {
+                level = k / 2;
+                if (element_priority < pq->elements[k].priority) { 
+                        pq->elements[k] = pq->elements[level];
+                        k = level;
+                } else {
+                        break;
+                }
+        }
+
+        pq->elements[k].data = pqueue_elem_data;
+        pq->elements[k].priority = element_priority;
 }
