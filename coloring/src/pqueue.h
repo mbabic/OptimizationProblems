@@ -51,5 +51,7 @@ void pqueue_enqueue(PQueue *, void *);
 
 void pqueue_dequeue(PQueue *, void **, double *);
 
+void pqueue_reset(PQueue *);
+
 void pqueue_free(PQueue *);
 #endif

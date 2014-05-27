@@ -85,6 +85,9 @@ pqueue_enqueue(PQueue *pq, void *pqueue_elem_data) {
         pq->elements[k].priority = element_priority;
 }
 
+/**
+ *
+ */
 void 
 pqueue_dequeue(PQueue *pq, void **data, double *priority) {
 
@@ -116,9 +119,24 @@ pqueue_dequeue(PQueue *pq, void **data, double *priority) {
         pq->elements[k] = pq->elements[pq->nElements];
 }
 
+/**
+ * "Empty" the given pqueue without freeing associated memory.
+ * @param PQueue *pq
+ *      The priority queue to be reset.
+ */
+void
+pqueue_reset(PQueue *pq) {
+        pq->nElements = 1;
+}
 
+/**
+ * Free memory associated with the given priority queue.
+ * @param PQueue *pq
+ *      Pointer to the pq structure to be freed.
+ */
 void
 pqueue_free(PQueue *pq) {
         if (!pq) return;
         if (pq->elements) free(pq->elements);
+        free(pq);
 }

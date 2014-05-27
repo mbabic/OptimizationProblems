@@ -177,10 +177,11 @@ graph_update_saturation_degrees(Graph *g) {
  * Returns the saturation degree of the given node.  Implements the interface
  * defined by the pqueue module.
  */
-int
-node_get_saturation_degree(void *x) {
+double
+node_calculate_priority(void *x) {
         Node *n = (Node *)x;
-        return n->saturation_degree;
+        return (double) ( (double) n->saturation_degree) + 
+                ( (double) n->degree / (double) n->n);
 }
 
 

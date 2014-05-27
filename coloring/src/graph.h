@@ -66,4 +66,6 @@ Node * graph_get_node_by_id(Graph *, int);
 
 void graph_update_saturation_degrees(Graph *);
 
+double node_calculate_priority(void *);
+
 #endif
