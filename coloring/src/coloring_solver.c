@@ -38,6 +38,7 @@ produce_initial_solution(Graph *g) {
 
         PQueue *pq;
         Node *u;
+        double pri;
         int c;
 
         pq = pqueue_init(g->n, node_calculate_priority);        
@@ -53,15 +54,23 @@ produce_initial_solution(Graph *g) {
 
         while (!pqueue_is_empty(pq)) {
 
-                pqueue_dequeue(pq, (void **) &u, NULL);
-                
+                pqueue_dequeue(pq, (void **) &u, &pri);
+               
                 c = graph_get_lowest_available_color(g, u);
 
                 u->color = c;
-                
+               
                 graph_update_saturation_degrees(g);
                 update_pqueue_priorities(g, pq);
         }
+#ifdef DEBUG
+        /*
+         * If debug flag defined, validate results of output. 
+         * (i.e., ensure that the coloring produced is valid)
+         */
+        graph_is_valid_coloring(g, 1);
+
+#endif
 }
 
 static void

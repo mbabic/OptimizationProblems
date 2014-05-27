@@ -7,7 +7,7 @@
 #include <string.h>
 
 #include "graph.h"
-
+#include "utils.h"
 
 static void
 graph_allocation_error() {
@@ -21,8 +21,8 @@ int
 int_comp(const void *a, const void *b) {
         int *x = (int *)a;
         int *y = (int *)b;
-        if (x < y) return -1;
-        else if (y < x) return 1;
+        if (*x < *y) return -1;
+        else if (*y < *x) return 1;
         return 0;
 }
 
@@ -241,7 +241,7 @@ graph_get_lowest_available_color(Graph *g, Node *u) {
 
         /* Find and return lowest color. */
         for (i = 0; i < (colors_size - 1); i++) {
-                
+
                 if (colors[i] > lowest_color) return lowest_color;
                 else if ( (colors[i+1] - colors[i]) > 1) return colors[i] + 1;
                 
@@ -251,3 +251,46 @@ graph_get_lowest_available_color(Graph *g, Node *u) {
         return colors[i] + 1;
 }
 
+
+/**
+ *
+ */
+int
+graph_is_valid_coloring(Graph *g, int debug) {
+       
+        Node u, v; 
+        int i, j, isValid = 1;
+
+        assert(g != NULL);
+
+        if (debug) 
+                fprintf(stderr, "====== Validating coloring produced ======\n");
+
+        for (i = 0; i < g->n; i++) {
+
+                u = g->nodes[i];
+
+                for (j = 0; j < g->n; j++) {
+
+                        if (i == j) continue;
+
+                        v = g->nodes[j];
+
+                        if (g->adj[i][j] == 1 && v.color == u.color) {
+
+                                if (debug)
+                                        fprintf(stderr, "Adjacent nodes %d "
+                                            "and %d are colored with the same "
+                                            "color %d.\n", u.id, v.id, 
+                                            u.color);
+                                isValid = 0;
+
+                        }
+                }
+        }
+
+        if (debug && isValid) 
+                fprintf(stderr, "Coloring was valid!\n");
+
+        return isValid;
+}

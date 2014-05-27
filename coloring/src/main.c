@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "coloring_solver.h"
 #include "graph.h"
 #include "utils.h"
 
@@ -43,6 +44,7 @@ main(int argc, char **argv) {
 
         parse_args(argc, argv, &g);
 
+        solve_coloring_instance(g);
 
         return 0;
 }
@@ -108,7 +110,6 @@ parse_args(int argc, char **argv, Graph **g) {
 
                         graph_add_edge(*g, u, v);
 
-                        DEBUG_PRINT("Added edge between %d and %d.\n", u, v);
                 }
                 lineno++;
         }

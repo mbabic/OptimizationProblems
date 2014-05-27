@@ -68,6 +68,8 @@ Node * graph_get_node_by_id(Graph *, int);
 
 void graph_update_saturation_degrees(Graph *);
 
+int graph_is_valid_coloring(Graph *, int);
+
 double node_calculate_priority(void *);
 
 #endif
