@@ -10,8 +10,9 @@ SRC = src
 CC = gcc
 CFLAGS = -c
 
-SOURCES = $(SRC)/main.c $(SRC)/graph.c $(SRC)/graph.h 
-OBJS = $(BIN)/main.o $(BIN)/graph.o 
+SOURCES = $(SRC)/main.c $(SRC)/graph.c $(SRC)/graph.h $(SRC)/utils.h
+SOURCES += $(SRC)/coloring_solver.c $(SRC)/coloring_solver.h
+OBJS = $(BIN)/main.o $(BIN)/graph.o $(BIN)/coloring_solver.o 
 EXE = coloring_solver
 
 all: CFLAGS += -O3
