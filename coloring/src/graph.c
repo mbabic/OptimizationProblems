@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "graph.h"
 
@@ -13,6 +14,16 @@ graph_allocation_error() {
         fprintf(stderr, "Memory allocation failed. %s: %d\n", __FILE__,
                         __LINE__);
         exit(1);
+}
+
+/* Integer comparison function passed to qsort. */
+int
+int_comp(const void *a, const void *b) {
+        int *x = (int *)a;
+        int *y = (int *)b;
+        if (x < y) return -1;
+        else if (y < x) return 1;
+        return 0;
 }
 
 /**
@@ -184,4 +195,59 @@ node_calculate_priority(void *x) {
                 ( (double) n->degree / (double) n->n);
 }
 
+/**
+ * Given a pointer to a graph and a node in that graph, return the integer
+ * representing the lowest color which could be used to legally color the
+ * given node.
+ * WARNING: non-reentrant, uses static state structure.
+ * @param Graph *g
+ *      Pointer to graph instance.
+ * @param Node *u
+ *      The node to be colored.
+ */
+int
+graph_get_lowest_available_color(Graph *g, Node *u) {
+
+        static int *colors = NULL;
+        Node *v;
+        static int colors_size = 0;
+        int i, lowest_color = 1;
+
+        assert(g != NULL);
+        assert(u != NULL);
+        
+        if (!colors) {
+                colors = calloc(g->n, sizeof(int));
+                if (!colors) graph_allocation_error();         
+        } else {
+                memset(colors, '\0', (colors_size + 1) * sizeof(int));
+                colors_size = 0;
+        }
+
+        /* Populate colors array with colors of neighbours of u. */
+        for (i = 0; i < g->n; i++) {
+
+                if (g->adj[u->id][i] == (char) 1) {
+
+                        v = graph_get_node_by_id(g, i);
+                       
+                        if (v->color) 
+                                colors[colors_size++] = v->color;                        
+                }
+        }
+
+        /* Sort array of colors found. */
+        qsort(colors, colors_size, sizeof(int), int_comp);
+
+        /* Find and return lowest color. */
+        for (i = 0; i < (colors_size - 1); i++) {
+                
+                if (colors[i] > lowest_color) return lowest_color;
+                else if ( (colors[i+1] - colors[i]) > 1) return colors[i] + 1;
+                
+                lowest_color = colors[i] + 1;               
+        }
+        // i = colors_size - 1
+        return colors[i] + 1;
+}
 

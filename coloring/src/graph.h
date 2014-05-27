@@ -62,6 +62,8 @@ void graph_get_adjacent_nodes(Graph *, int);
 
 void graph_color_node(Graph *, int, int);
 
+int graph_get_lowest_available_color(Graph *, Node *);
+
 Node * graph_get_node_by_id(Graph *, int);
 
 void graph_update_saturation_degrees(Graph *);
