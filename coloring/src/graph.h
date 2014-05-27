@@ -25,6 +25,12 @@ typedef struct {
 
         /** The color given to the node. */
         int color;       
+
+        /**
+         * Number of nodes in the graph in which the Node appears.  Convenient
+         * in calculations of Node's key in priority queue.
+         */
+        int n;
 } Node;
 
 typedef struct {
@@ -57,4 +63,7 @@ void graph_get_adjacent_nodes(Graph *, int);
 void graph_color_node(Graph *, int, int);
 
 Node * graph_get_node_by_id(Graph *, int);
+
+void graph_update_saturation_degrees(Graph *);
+
 #endif

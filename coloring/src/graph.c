@@ -42,8 +42,8 @@ graph_init(int nNodes) {
         for (i = 0; i < g->n; i++) {
 
                 g->nodes[i].id = i;
-                g->nodes[i].color = -1;
-
+                g->nodes[i].color = 0;
+                g->nodes[i].n = g->n;
                 /* 
                  * Use calloc such that graph initially assumes no edges
                  * between nodes. 
@@ -96,8 +96,8 @@ graph_add_edge(Graph *g, int u, int v) {
         assert(g != NULL);
         assert(u< g->n && v < g->n);
 
-        g->adj[u][v] = 1;
-        g->adj[v][u] = 1;
+        g->adj[u][v] = (char) 1;
+        g->adj[v][u] = (char) 1;
 
         n = graph_get_node_by_id(g, u);
         n->degree++;
@@ -122,8 +122,8 @@ graph_remove_edge(Graph *g, int u, int v) {
         assert(g != NULL);
         assert(u < g->n && v < g->n);
 
-        g->adj[u][v] = 0;
-        g->adj[v][u] = 0;
+        g->adj[u][v] = (char) 0;
+        g->adj[v][u] = (char) 0;
 
         n = graph_get_node_by_id(g, u);
         n->degree++;
@@ -133,5 +133,54 @@ graph_remove_edge(Graph *g, int u, int v) {
 }
 
 
+/**
+ * Updates the saturation degrees for each node in the graph.
+ * TODO: clean up this implementation.
+ * @param Graph *g
+ *      Pointer to the graphs for which saturation degrees are to be 
+ *      calculated.
+ */
+void
+graph_update_saturation_degrees(Graph *g) {
+
+        Node *u, *v;
+        char **adj, *col;
+        int i, j;
+        
+        assert(g != NULL);
+       
+        adj = g->adj;
+
+        for (i = 0; i < g->n; i++) {
+
+                u = &(g->nodes[i]);
+              
+                col = adj[i];
+
+                u->saturation_degree = 0;
+
+                for (j = 0; j < g->n; j++) {
+
+                        if (col[j] == (char) 1) {
+                                v = graph_get_node_by_id(g, j);
+
+                                if (v->color && u->color != v->color)
+                                        u->saturation_degree++;
+                        }
+                } 
+
+        }
+
+}
+
+/**
+ * Returns the saturation degree of the given node.  Implements the interface
+ * defined by the pqueue module.
+ */
+int
+node_get_saturation_degree(void *x) {
+        Node *n = (Node *)x;
+        return n->saturation_degree;
+}
 
 
