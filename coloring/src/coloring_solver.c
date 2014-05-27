@@ -37,14 +37,14 @@ static void
 produce_initial_solution(Graph *g) {
 
         PQueue *pq;
-        Node *u, *v;
+        Node *u;
         int c;
 
         pq = pqueue_init(g->n, node_calculate_priority);        
 
         update_pqueue_priorities(g, pq); 
 
-        pqueue_dequeue(pw, &u, NULL);
+        pqueue_dequeue(pq, (void **) &u, NULL);
 
         u->color = 1;
 
@@ -53,7 +53,7 @@ produce_initial_solution(Graph *g) {
 
         while (!pqueue_is_empty(pq)) {
 
-                pqueue_dequeue(pw, &u, NULL);
+                pqueue_dequeue(pq, (void **) &u, NULL);
                 
                 c = graph_get_lowest_available_color(g, u);
 
@@ -76,7 +76,7 @@ update_pqueue_priorities(Graph *g, PQueue *pq) {
         pqueue_reset(pq);
 
         for (i = 0; i < g->n; i++) {
-                n = &(g->elements[i]);
+                n = &(g->nodes[i]);
                 if (!n->color) pqueue_enqueue(pq, (void *) n);
         }
 }
