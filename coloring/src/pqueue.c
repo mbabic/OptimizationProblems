@@ -120,6 +120,13 @@ pqueue_dequeue(PQueue *pq, void **data, double *priority) {
 }
 
 /**
+ * Returns 1 if given pqueue is empty, 0 otherwise.
+ */
+int
+pqueue_is_empty(PQueue *pq) {
+        return pq->nElements == 1;
+}
+/**
  * "Empty" the given pqueue without freeing associated memory.
  * @param PQueue *pq
  *      The priority queue to be reset.

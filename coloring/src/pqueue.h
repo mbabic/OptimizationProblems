@@ -53,5 +53,7 @@ void pqueue_dequeue(PQueue *, void **, double *);
 
 void pqueue_reset(PQueue *);
 
+int pqueue_is_empty(PQueue *);
+
 void pqueue_free(PQueue *);
 #endif
