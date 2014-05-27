@@ -67,30 +67,6 @@ graph_init(int nNodes) {
 }
 
 /**
- * Returns pointer to Node struct with given id in given Graph.
- * @param Graph *g
- *      The graph in which to search for a node with the given id.
- * @param int id
- *      The id of the node to search for.
- * @return
- *      Pointer to Node struct with corresponding id in graph.
- */
-Node *
-graph_get_node_by_id(Graph *g, int id) {
-
-        int i = 0;
-
-        assert(id < g->n);
-
-        while (i < g->n) {
-                if (g->nodes[i].id == id) return &(g->nodes[i]);
-                i++;
-        }
-
-        return NULL; 
-}
-
-/**
  * Add an edge between nodes with the given ids in the graph.
  * @param Graph *g
  *      The graph to which to add the edge.
@@ -110,10 +86,10 @@ graph_add_edge(Graph *g, int u, int v) {
         g->adj[u][v] = (char) 1;
         g->adj[v][u] = (char) 1;
 
-        n = graph_get_node_by_id(g, u);
+        n = &(g->nodes[u]);
         n->degree++;
 
-        n = graph_get_node_by_id(g, v);
+        n = &(g->nodes[v]);
         n->degree++;
 }
 
@@ -136,10 +112,10 @@ graph_remove_edge(Graph *g, int u, int v) {
         g->adj[u][v] = (char) 0;
         g->adj[v][u] = (char) 0;
 
-        n = graph_get_node_by_id(g, u);
+        n = &(g->nodes[u]);
         n->degree++;
 
-        n = graph_get_node_by_id(g, v);
+        n = &(g->nodes[v]);
         n->degree++;
 }
 
@@ -152,36 +128,20 @@ graph_remove_edge(Graph *g, int u, int v) {
  *      calculated.
  */
 void
-graph_update_saturation_degrees(Graph *g) {
+graph_update_saturation_degrees(Graph *g, Node *n) {
 
-        Node *u, *v;
-        char **adj, *col;
-        int i, j;
+        int i;
         
         assert(g != NULL);
-       
-        adj = g->adj;
+        assert(n != NULL);
 
         for (i = 0; i < g->n; i++) {
+                if (i == n->id) continue;
 
-                u = &(g->nodes[i]);
-              
-                col = adj[i];
-
-                u->saturation_degree = 0;
-
-                for (j = 0; j < g->n; j++) {
-
-                        if (col[j] == (char) 1) {
-                                v = graph_get_node_by_id(g, j);
-
-                                if (v->color && u->color != v->color)
-                                        u->saturation_degree++;
-                        }
-                } 
-
-        }
-
+                if (g->adj[n->id][i] == (char)1 && 
+                    g->nodes[i].color != n->color)
+                        g->nodes[i].saturation_degree++;
+        }       
 }
 
 /**
@@ -229,7 +189,7 @@ graph_get_lowest_available_color(Graph *g, Node *u) {
 
                 if (g->adj[u->id][i] == (char) 1) {
 
-                        v = graph_get_node_by_id(g, i);
+                        v = &(g->nodes[i]);
                        
                         if (v->color) 
                                 colors[colors_size++] = v->color;                        

@@ -49,7 +49,7 @@ produce_initial_solution(Graph *g) {
 
         u->color = 1;
 
-        graph_update_saturation_degrees(g);
+        graph_update_saturation_degrees(g, u);
         update_pqueue_priorities(g, pq);
 
         while (!pqueue_is_empty(pq)) {
@@ -60,7 +60,7 @@ produce_initial_solution(Graph *g) {
 
                 u->color = c;
                
-                graph_update_saturation_degrees(g);
+                graph_update_saturation_degrees(g, u);
                 update_pqueue_priorities(g, pq);
         }
 #ifdef DEBUG
