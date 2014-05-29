@@ -254,3 +254,38 @@ graph_is_valid_coloring(Graph *g, int debug) {
 
         return isValid;
 }
+
+/**
+ * Copies the nodes of the given graph into the given destination pointer
+ * to an array of nodes.
+ * @param Graph *g
+ *      The source graph.
+ * @param Node **dest
+ *      Pointer to destination array of nodes.  Function will allocate memory
+ *      necessary to store nodes at given location.
+ */ 
+void
+graph_copy_nodes(Graph *g, Node **dest) {
+
+        Node *src_node, *dest_node;
+        int i;
+
+        assert(g != NULL);
+        assert(dest != NULL);
+        assert(*dest != NULL);
+
+        *dest = malloc(sizeof(Node) * g->n);
+        if (!*dest) graph_allocation_error();
+
+        for (i = 0; i < g->n; i++) {
+                
+                src_node = &(g->nodes[i]);
+                dest_node = &((*dest)[i]);
+
+                dest_node->id = src_node->id;
+                dest_node->degree = src_node->degree;
+                dest_node->saturation_degree = src_node->saturation_degree;
+                dest_node->color = src_node->color;
+                dest_node->n = src_node->n;
+        }        
+}

@@ -64,6 +64,8 @@ void graph_color_node(Graph *, int, int);
 
 int graph_get_lowest_available_color(Graph *, Node *);
 
+void graph_copy_nodes(Graph *, Node **);
+
 void graph_update_saturation_degrees(Graph *, Node *);
 
 int graph_is_valid_coloring(Graph *, int);

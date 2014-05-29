@@ -14,6 +14,21 @@
 static void
 produce_initial_solution(Graph *);
 
+static int
+calculate_initial_solution_cost(Graph *);
+
+static int
+calculate_proposed_solution_cost(Graph *, Node *);
+
+static void
+update_color_classes(Graph *g, Node *, int *, int, int);
+
+static void
+update_bad_edges(Graph *g, Node *, int *, int, int); 
+
+static void
+generate_color_classes(Graph *, int **);
+
 static void
 update_pqueue_priorities(Graph *, PQueue *);
 
