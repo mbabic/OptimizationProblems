@@ -15,7 +15,7 @@ static void
 produce_initial_solution(Graph *);
 
 static int
-calculate_initial_solution_cost(Graph *);
+calculate_initial_solution_cost(Node *, int *, int *, int);
 
 static int
 calculate_proposed_solution_cost(Graph *, Node *);
@@ -27,18 +27,118 @@ static void
 update_bad_edges(Graph *g, Node *, int *, int, int); 
 
 static void
-generate_color_classes(Graph *, int **);
+generate_color_classes(Node *, int **, int);
+
+static void
+generate_bad_edges(Graph *, Node *, int **);
 
 static void
 update_pqueue_priorities(Graph *, PQueue *);
 
 char *
 solve_coloring_instance(Graph *g) {
-        
+
+        Node *S, *S_proposed, *S_opt;
+        int *C;                         /* An array such that C[i] is the size
+                                           of the i_th color class. */
+        int *E;                         /* An array such that E[i] is the 
+                                           number of "bad edges" in the i_th
+                                           color class (i.e., the number of 
+                                           edges whose endpoints are colored
+                                           the same color. */
+        int c, c_proposed, c_opt;
+
+
+        assert(g != NULL);
+
+        /* Produce initial solution using DSATUR algorithm. */
         produce_initial_solution(g);        
+        
+        /* Copy initial solution into S and S_opt. */
+        graph_copy_nodes(g, &S);
+        graph_copy_nodes(g, &S_opt);
 
 
+
+        /* Init auxilliary structs. */
+        generate_color_classes(S, &C, g->n);
+        generate_bad_edges(g, S, &E);
+        
+        
         return NULL;
+}
+
+/**
+ * Calculate the cost of the initial solution to the coloring problem.
+ * The "cost"/"target" function is given by the following expression:
+ *
+ * f(S) = sum_{i=1}^{k} (2*|C_i|*|E_i| - |C_i|^2)
+ *
+ * where 
+ *      k = number of color classes
+ *
+ * TODO: CITE JOHNSON PAPER
+ */
+static int
+calculate_initial_solution_cost(Node *S, int *C, int *E, int n) {
+
+        int i, cost = 0;
+
+        assert(S != NULL);
+        assert(C != NULL);
+        assert(E != NULL);
+        assert(n > 0);
+
+        for (i = 0; i < n; i++) {
+                cost += (2 * E[i] * C[i]) - ((C[i])^2);
+        }
+
+        return cost;
+}
+
+
+static void
+generate_bad_edges(Graph *g, Node *S, int **E) {
+
+        assert(g != NULL);
+        assert(S != NULL);
+        assert(E != NULL);
+        assert(*E != NULL);
+
+        *E = calloc(g->n, sizeof(int));
+        if (!*E) ALLOCATION_ERROR();
+
+        /* Since we know initial solution is a correct coloring, 
+         * for all i |E_i| = 0 */
+}
+
+/**
+ * Initialize the structure containing the sizes of each color class.
+ * @param Node *S
+ *      Pointer to array of nodes (i.e., the solution from which the color
+ *      class sizes are to be determined)
+ * @param int **C
+ *      Pointer to array of integers used to store the color class size
+ *      structure.
+ * @param int n
+ *      The number of nodes in the graph/solution.
+ */
+static void
+generate_color_classes(Node *S, int **C, int n) {
+
+        int i;
+
+        assert(S != NULL);
+        assert(C != NULL);
+        assert(*C != NULL);
+        assert(n > 0);
+
+        *C = calloc(n, sizeof(int));
+        if (!*C) ALLOCATION_ERROR();
+
+        for (i = 0; i < n; i++) {
+                (*C)[S[i].color]++;
+        } 
 }
 
 /**
