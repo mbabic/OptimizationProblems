@@ -272,7 +272,6 @@ graph_copy_nodes(Graph *g, Node **dest) {
 
         assert(g != NULL);
         assert(dest != NULL);
-        assert(*dest != NULL);
 
         *dest = malloc(sizeof(Node) * g->n);
         if (!*dest) graph_allocation_error();

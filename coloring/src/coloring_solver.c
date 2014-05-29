@@ -3,6 +3,7 @@
  * solution to the coloring problem given an instance of a graph.
  */
 #include <assert.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,7 +18,7 @@
 #define FREEZE_LIM 1
 #define INITIAL_TEMPERATURE 0.8
 #define TEMPFACTOR 0.5
-#define MINPERCENT 0.1
+#define MINPERCENT 100
 #define SIZEFACTOR 10
 #define N 9.5
 #define CUTOFF 10
@@ -37,8 +38,11 @@ generate_color_classes(Node *, int **, int);
 static void
 generate_bad_edges(Graph *, Node *, int **);
 
+static int
+is_valid_solution(int *, int);
+
 static void
-propose_new_solution(Graph *, int, int *, int *);
+propose_new_solution(Graph *, Node *, int, int *, int *);
 
 static void
 update_pqueue_priorities(Graph *, PQueue *);
@@ -53,6 +57,7 @@ char *
 solve_coloring_instance(Graph *g) {
 
         Node *S, *S_opt;
+        double r, T, e;
         int *C;                         /* An array such that C[i] is the size
                                            of the i_th color class. */
         int *E;                         /* An array such that E[i] is the 
@@ -67,6 +72,9 @@ solve_coloring_instance(Graph *g) {
 
         /* Seed randomon number generator. */
         srand(time(NULL));
+
+        /* Set initial temperature. */
+        T = INITIAL_TEMPERATURE;
 
         /* Produce initial solution using DSATUR algorithm. */
         produce_initial_solution(g);        
@@ -92,19 +100,32 @@ solve_coloring_instance(Graph *g) {
         c = calculate_initial_solution_cost(S, C, E, g->n);
         c_opt = c;
 
-        while (freeze_count < FREEZE_LIM) {
+#if DEBUG
+
+        for (i = 0; i < g->n; i++) {
+                DEBUG_PRINT("%d->color = %d", i, S[i].color);
+        }
+
+#endif
+        while (freeze_count < 1) {
         
                 n_trials = 0;
 
-                while (n_trials < SIZEFACTOR * N && changes < CUTOFF * N) {
+                while (n_trials < 1) {
 
                         n_trials++;
                         
-                        propose_new_solution(g, max_colors, &proposed_node, 
+                        propose_new_solution(g, S, max_colors, &proposed_node, 
                             &proposed_color);
-                        
+                       
+                        DEBUG_PRINT("Solution proposed: %d->color = %d\n",
+                                        proposed_node, proposed_color);
+
                         c_proposed = calculate_proposed_solution_cost(g, S,
                             C, E, c, proposed_node, proposed_color);
+
+                        DEBUG_PRINT("Proposed solution cost: %d\n Old solution cost: %d\n",
+                                        c_proposed, c);
 
                         delta = c_proposed - c;
 
@@ -118,11 +139,38 @@ solve_coloring_instance(Graph *g) {
                                 update_bad_edges(g, S, E, proposed_node,
                                     old_color, proposed_color);
                                 S[proposed_node].color = proposed_color; 
-                        }
+        
+                                if (is_valid_solution(E, max_colors)) {
 
+                                        /* Update optimal solution. */
+                                
+                                
+                                        /* Reset freeze count. */
+                                        freeze_count = 0;
+                                }
+                        } else {
+
+                                r = (double) rand() / (double) RAND_MAX;
+                                e = exp(((double) c_proposed - (double) c) / T);               
+                                if (r <= e) {
+                                        changes++;
+                                        c = c_proposed;
+                                        old_color = S[proposed_node].color;
+                                        update_color_classes(C, proposed_node,
+                                            old_color, proposed_color);
+                                        update_bad_edges(g, S, E, proposed_node,
+                                            old_color, proposed_color);
+                                        S[proposed_node].color = proposed_color;
+
+                                }
+                        }
+                }
+
+                T = TEMPFACTOR * T;
+                if (((double) changes / (double) n_trials) < MINPERCENT) {
+                        freeze_count++;
                 }
         }
-
 
         return NULL;
 }
@@ -148,8 +196,8 @@ calculate_initial_solution_cost(Node *S, int *C, int *E, int n) {
         assert(E != NULL);
         assert(n > 0);
 
-        for (i = 0; i < n; i++) {
-                cost += (2 * E[i] * C[i]) - ((C[i])^2);
+        for (i = 1; i < n+1; i++) {
+                cost += (2 * E[i] * C[i]) - (C[i] * C[i]);
         }
 
         return cost;
@@ -184,6 +232,7 @@ calculate_proposed_solution_cost(Graph *g, Node *S, int *C, int *E,
             C_neighbour_color, E_neighbour_color, n_conflicts_resolved = 0,
             n_conflicts_introduced = 0;
 
+
         cost = neighbour_cost;
 
         neighbour_color = S[u].color;
@@ -193,9 +242,10 @@ calculate_proposed_solution_cost(Graph *g, Node *S, int *C, int *E,
          * proposed to be updated.
          */
         cost -= (2 * C[neighbour_color] * E[neighbour_color]) - 
-                ((C[neighbour_color])^2);
+                (C[neighbour_color] * C[neighbour_color]);
 
-        cost -= (2 * C[new_color] * E[new_color]) - ((C[new_color])^2);
+        cost -= (2 * C[new_color] * E[new_color]) - 
+                (C[new_color] * C[new_color]);
 
         /*
          * Calculate updated values of relevants color class and bad edge
@@ -214,7 +264,6 @@ calculate_proposed_solution_cost(Graph *g, Node *S, int *C, int *E,
         for (i = 0; i < g->n; i++) {
 
                 if (g->adj[u][i] == 1 && i != u) {
-
                         if (S[i].color == neighbour_color) {
                                 n_conflicts_resolved++;
                         } else if (S[i].color == new_color) {
@@ -228,10 +277,10 @@ calculate_proposed_solution_cost(Graph *g, Node *S, int *C, int *E,
 
         /* We can now calculate the updated cost. */
         cost += (2 * C_neighbour_color * E_neighbour_color) -
-                ((C_neighbour_color)^2);
+                (C_neighbour_color * C_neighbour_color);
 
         cost += (2 * C_new_color * E_new_color) -
-                ((C_new_color)^2);
+                (C_new_color * C_new_color);
 
         return cost;
 }
@@ -242,7 +291,6 @@ generate_bad_edges(Graph *g, Node *S, int **E) {
         assert(g != NULL);
         assert(S != NULL);
         assert(E != NULL);
-        assert(*E != NULL);
 
         *E = calloc(g->n + 1, sizeof(int));
         if (!*E) ALLOCATION_ERROR();
@@ -269,7 +317,6 @@ generate_color_classes(Node *S, int **C, int n) {
 
         assert(S != NULL);
         assert(C != NULL);
-        assert(*C != NULL);
         assert(n > 0);
 
         *C = calloc(n + 1, sizeof(int));
@@ -280,12 +327,42 @@ generate_color_classes(Node *S, int **C, int n) {
         } 
 }
 
+/**
+ * Returns 1 if solution is valid (assumes bad edges data structures has been
+ * updated prior to being called).
+ * @param int *E
+ *      The bad edges data structure.  Must be updated before calling this 
+ *      function.
+ * @param int max_colors
+ *      The max number of colors we are allowing in new solutions.  Based on
+ *      number of colors returned by initial solution.
+ */
+static int
+is_valid_solution(int *E, int max_colors) {
+
+        int i;
+        for (i = 1; i < max_colors + 1; i++) {
+                if (E[i] != 0) return 0;
+        }
+        return 1;
+}
+
+/**
+ * Proposee a new solution which is a neighbour of the current solution.
+ */
 static void
-propose_new_solution(Graph *g, int max_colors, int *proposed_node, 
+propose_new_solution(Graph *g, Node *S, int max_colors, int *proposed_node, 
     int *proposed_color) {
 
-        *proposed_node = rand() % g->n;
-        *proposed_color = rand() % max_colors;
+        int isValid = 0;
+        while (!isValid) {
+                *proposed_node = rand() % g->n;
+                *proposed_color = (rand() % max_colors) + 1;
+
+                if (S[*proposed_node].color != *proposed_color) {
+                        isValid = 1;
+                }
+        }
 }
 
 /**
