@@ -17,3 +17,12 @@
  */
 #define MAX(a, b) a > b ? a : b
 
+/*
+ * MACRO outputting and error message and exiting the program when a memory
+ * allocation error occurs.
+ */
+#define ALLOCATION_ERROR() do {\
+        fprintf(stderr, "Memory allocation error: %s:%d", __FILE__, \
+                        __LINE__);\
+        exit(1);\
+} while (0)
