@@ -15,11 +15,11 @@
 
 /* Define simulation constants. */
 /* TODO: determine good values for constants below from paper. */
-#define FREEZE_LIM 1
-#define INITIAL_TEMPERATURE 0.8
-#define TEMPFACTOR 0.5
-#define MINPERCENT 100
-#define SIZEFACTOR 10
+#define FREEZE_LIM 4
+#define INITIAL_TEMPERATURE 0.9
+#define TEMPFACTOR 0.95
+#define MINPERCENT 2
+#define SIZEFACTOR 16
 #define N 9.5
 #define CUTOFF 10
 
@@ -31,6 +31,9 @@ calculate_initial_solution_cost(Node *, int *, int *, int);
 
 static int
 calculate_proposed_solution_cost(Graph *, Node *, int *, int *, int, int, int);
+
+static void
+copy_solution(Node *, Node *, int);
 
 static void
 generate_color_classes(Node *, int **, int);
@@ -58,6 +61,7 @@ solve_coloring_instance(Graph *g) {
 
         Node *S, *S_opt;
         double r, T, e;
+        char *sol_str;
         int *C;                         /* An array such that C[i] is the size
                                            of the i_th color class. */
         int *E;                         /* An array such that E[i] is the 
@@ -100,32 +104,22 @@ solve_coloring_instance(Graph *g) {
         c = calculate_initial_solution_cost(S, C, E, g->n);
         c_opt = c;
 
-#if DEBUG
+        DEBUG_PRINT("Original cost: %d\n", c);
 
-        for (i = 0; i < g->n; i++) {
-                DEBUG_PRINT("%d->color = %d", i, S[i].color);
-        }
-
-#endif
-        while (freeze_count < 1) {
+        while (freeze_count < FREEZE_LIM) {
         
                 n_trials = 0;
-
-                while (n_trials < 1) {
+                changes = 0;
+                while (n_trials < 100 && changes < 80) {
 
                         n_trials++;
                         
                         propose_new_solution(g, S, max_colors, &proposed_node, 
                             &proposed_color);
                        
-                        DEBUG_PRINT("Solution proposed: %d->color = %d\n",
-                                        proposed_node, proposed_color);
-
                         c_proposed = calculate_proposed_solution_cost(g, S,
                             C, E, c, proposed_node, proposed_color);
 
-                        DEBUG_PRINT("Proposed solution cost: %d\n Old solution cost: %d\n",
-                                        c_proposed, c);
 
                         delta = c_proposed - c;
 
@@ -140,18 +134,21 @@ solve_coloring_instance(Graph *g) {
                                     old_color, proposed_color);
                                 S[proposed_node].color = proposed_color; 
         
-                                if (is_valid_solution(E, max_colors)) {
+                                if (is_valid_solution(E, max_colors) &&
+                                    c <= c_opt) {
 
                                         /* Update optimal solution. */
                                 
-                                
+DEBUG_PRINT("Proposed solution cost: %d\n Old solution cost: %d\n", c_proposed, c);
+                                        copy_solution(S, S_opt, g->n); 
+                                        c_opt = c;
                                         /* Reset freeze count. */
                                         freeze_count = 0;
                                 }
                         } else {
 
                                 r = (double) rand() / (double) RAND_MAX;
-                                e = exp(((double) c_proposed - (double) c) / T);               
+                                e = exp(-((double)c_proposed - (double)c) / T);               
                                 if (r <= e) {
                                         changes++;
                                         c = c_proposed;
@@ -161,7 +158,6 @@ solve_coloring_instance(Graph *g) {
                                         update_bad_edges(g, S, E, proposed_node,
                                             old_color, proposed_color);
                                         S[proposed_node].color = proposed_color;
-
                                 }
                         }
                 }
@@ -172,6 +168,14 @@ solve_coloring_instance(Graph *g) {
                 }
         }
 
+#ifdef DEBUG
+        fprintf(stdout, "----------------------------------------------=---\n");
+        fprintf(stdout, "COST: %d\n", c_opt);
+        for (i = 0; i < g->n; i++) {
+                //fprintf(stdout, "%d->color = %d\n", i, S_opt[i].color);
+        }
+        fprintf(stdout, "----------------------------------------------=---\n");
+#endif
         return NULL;
 }
 
@@ -283,6 +287,17 @@ calculate_proposed_solution_cost(Graph *g, Node *S, int *C, int *E,
                 (C_new_color * C_new_color);
 
         return cost;
+}
+
+/**
+ *
+ */
+static void
+copy_solution(Node *src, Node *dest, int n) {
+        int i;
+        for (i = 0; i < n; i++) {
+                dest[i].color = src[i].color;
+        }
 }
 
 static void
